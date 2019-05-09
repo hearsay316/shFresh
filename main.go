@@ -1,9 +1,8 @@
 package main
 
 import (
+	_ "fresh/routers"
 	"github.com/astaxie/beego"
-	_ "shFresh/models"
-	_ "shFresh/routers"
 )
 
 func main() {

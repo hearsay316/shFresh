@@ -1,11 +1,11 @@
 package test
 
 import (
+	_ "fresh/routers"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"runtime"
-	_ "shFresh/routers"
 	"testing"
 
 	"github.com/astaxie/beego"
@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	_, file, _, _ := runtime.Caller(1)
+	_, file, _, _ := runtime.Caller(0)
 	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
 	beego.TestBeegoInit(apppath)
 }
