@@ -1,6 +1,11 @@
 package controllers
 
-import "github.com/astaxie/beego"
+import (
+	"encoding/json"
+	"fresh/models"
+	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
+)
 
 type UserController struct {
 	beego.Controller
@@ -26,4 +31,31 @@ func (C *UserController) HandleRge() {
 	// 3 梳理数据
 
 	//  返回视图
+}
+func (C *UserController) ShowUser() {
+	var user = models.OrderInfo{Id: 123, OrderId: "xsxs"}
+	C.Data["json"] = user
+	C.ServeJSON()
+}
+
+type user struct {
+	UserName string `json:"username"`
+	PassWord string `json:"password"`
+}
+
+func (C *UserController) HandleUser() {
+	var ob user
+	var err error
+	if err = json.Unmarshal(C.Ctx.Input.RequestBody, &ob); err == nil {
+		C.Data["json"] = ob
+	} else {
+		C.Data["json"] = err.Error()
+	}
+	C.Ctx.SetCookie("userName", "", -1)
+	C.SetSession("UserName", ob.UserName)
+	logs.Info(ob)
+	C.ServeJSON()
+	/*var user  = models.OrderInfo{Id:123,OrderId:"xsxs"}
+	C.Data["json"] = user
+	C.ServeJSON()*/
 }
