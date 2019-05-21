@@ -4,10 +4,27 @@ import (
 	"encoding/json"
 	"fresh/models"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
 )
 
 type UserController struct {
 	beego.Controller
+}
+type user struct {
+	UserName string `json:"username"`
+	PassWord string `json:"password"`
+	Remember bool   `json:"remember"`
+}
+
+/*user_name:''  ,
+pwd:'',
+cpwd:"",
+email:""*/
+type userReg struct {
+	UserName  string `json:"username"`
+	PassWord  string `json:"pwd"`
+	CPassWord string `json:"cpwd"`
+	Email     string `json:"email"`
 }
 
 // 注册页面
@@ -18,27 +35,31 @@ func (C *UserController) ShowReg() {
 // 处理注册数据
 func (C *UserController) HandleReg() {
 	// 1.获取数据
-	userName := C.GetString("user_name")
-	pwd := C.GetString("pwd")
-	cpwd := C.GetString("cpwd")
-	email := C.GetString("email")
-	//allow:=C.GetString("allow")
-	if userName == "" || pwd == "" || cpwd == "" || email == "" {
-		C.Data["error"] = "数据输错"
-		C.TplName = "register.html"
+	/*	userName := C.GetString("user_name")
+		pwd := C.GetString("pwd")
+		cpwd := C.GetString("cpwd")
+		email := C.GetString("email")
+		//allow:=C.GetString("allow")
+		if userName == "" || pwd == "" || cpwd == "" || email == "" {
+			C.Data["error"] = "数据输错"
+			C.TplName = "register.html"
+		}*/
+
+	var ob userReg
+	var err error
+	if err = json.Unmarshal(C.Ctx.Input.RequestBody, &ob); err == nil {
+		logs.Info(ob)
+		C.Data["json"] = ob
+	} else {
+		C.Data["json"] = err.Error()
 	}
+	C.ServeJSON()
 
 	// 2 校验数据
 
 	// 3 梳理数据
 
 	//  返回视图
-}
-
-type user struct {
-	UserName string `json:"username"`
-	PassWord string `json:"password"`
-	Remember bool   `json:"remember"`
 }
 
 // Post:登录
