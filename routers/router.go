@@ -10,14 +10,15 @@ import (
 func init() {
 	beego.InsertFilter("/Article/*", beego.BeforeRouter, FiltFunc)
 	beego.Router("/", &controllers.MainController{})
-	beego.Router("/register", &controllers.UserController{}, "get:ShowUser;post:HandleUser")
+	beego.Router("/login", &controllers.UserController{}, "post:HandleLogin")
+	beego.Router("/register", &controllers.UserController{}, "get:ShowReg;post:HandleReg")
 	beego.Router("/Article/user", &controllers.UserController{}, "get:ShowUser;post:HandleUser")
 }
 
 var FiltFunc = func(ctx *context.Context) {
 	logs.Info("app")
 	Username := ctx.Input.Session("UserName")
-	logs.Info(ctx.GetCookie("UserName"), "wdwdwd")
+	logs.Info(Username, "wdwdwd")
 	if Username == nil {
 		//ctx.Redirect(302, "/")
 		ctx.ResponseWriter.WriteHeader(404)

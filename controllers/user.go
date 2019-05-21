@@ -4,24 +4,26 @@ import (
 	"encoding/json"
 	"fresh/models"
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/logs"
 )
 
 type UserController struct {
 	beego.Controller
 }
 
+// 注册页面
 func (C *UserController) ShowReg() {
 	C.TplName = "register.html"
 }
-func (C *UserController) HandleRge() {
+
+// 处理注册数据
+func (C *UserController) HandleReg() {
 	// 1.获取数据
-	user_name := C.GetString("user_name")
+	userName := C.GetString("user_name")
 	pwd := C.GetString("pwd")
 	cpwd := C.GetString("cpwd")
 	email := C.GetString("email")
 	//allow:=C.GetString("allow")
-	if user_name == "" || pwd == "" || cpwd == "" || email == "" {
+	if userName == "" || pwd == "" || cpwd == "" || email == "" {
 		C.Data["error"] = "数据输错"
 		C.TplName = "register.html"
 	}
@@ -32,18 +34,15 @@ func (C *UserController) HandleRge() {
 
 	//  返回视图
 }
-func (C *UserController) ShowUser() {
-	var user = models.OrderInfo{Id: 123, OrderId: "xsxs"}
-	C.Data["json"] = user
-	C.ServeJSON()
-}
 
 type user struct {
 	UserName string `json:"username"`
 	PassWord string `json:"password"`
+	Remember bool   `json:"remember"`
 }
 
-func (C *UserController) HandleUser() {
+// Post:登录
+func (C *UserController) HandleLogin() {
 	var ob user
 	var err error
 	if err = json.Unmarshal(C.Ctx.Input.RequestBody, &ob); err == nil {
@@ -53,9 +52,19 @@ func (C *UserController) HandleUser() {
 	}
 	C.Ctx.SetCookie("userName", "", -1)
 	C.SetSession("UserName", ob.UserName)
-	logs.Info(ob)
 	C.ServeJSON()
 	/*var user  = models.OrderInfo{Id:123,OrderId:"xsxs"}
 	C.Data["json"] = user
 	C.ServeJSON()*/
+}
+
+func (C *UserController) ShowUser() {
+	var user = models.OrderInfo{Id: 123, OrderId: "xsxs"}
+	C.Data["json"] = user
+	C.ServeJSON()
+}
+func (C *UserController) HandleUser() {
+	var user = models.OrderInfo{Id: 123, OrderId: "xsxs"}
+	C.Data["json"] = user
+	C.ServeJSON()
 }

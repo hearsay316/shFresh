@@ -93,18 +93,17 @@ type IndexPromotionBanner struct { //首页促销商品展示表
 
 type OrderInfo struct { //订单表
 	Id           int
-	OrderId      string    `orm:"unique"`
-	User         *User     `orm:"rel(fk)"` //用户
-	Address      *Address  `orm:"rel(fk)"` //地址
-	PayMethod    int       //付款方式
-	TotalCount   int       `orm:"default(1)"` //商品数量
-	TotalPrice   int       //商品总价
-	TransitPrice int       //运费
-	Orderstatus  int       `orm:"default(1)"`   //订单状态
-	TradeNo      string    `orm:"default('')"`  //支付编号
-	Time         time.Time `orm:"auto_now_add"` //评论时间
-
-	OrderGoods []*OrderGoods `orm:"reverse(many)"`
+	OrderId      string        `orm:"size(191);unique"`
+	User         *User         `orm:"rel(fk)"` //用户
+	Address      *Address      `orm:"rel(fk)"` //地址
+	PayMethod    int           //付款方式
+	TotalCount   int           `orm:"default(1)"` //商品数量
+	TotalPrice   int           //商品总价
+	TransitPrice int           //运费
+	Orderstatus  int           `orm:"default(1)"`            //订单状态
+	TradeNo      string        `orm:"size(191);default('')"` //支付编号
+	Time         time.Time     `orm:"auto_now_add"`          //评论时间
+	OrderGoods   []*OrderGoods `orm:"reverse(many)"`
 }
 
 type OrderGoods struct { //订单商品表
@@ -121,7 +120,7 @@ func init() {
 	_ = orm.RegisterDataBase("default", "mysql", "root:qq123456@tcp(sh-cdb-5pd122qv.sql.tencentcdb.com:63231)/dailyfresh?charset=utf8")
 
 	// register model
-	orm.RegisterModel(new(User), new(Address), new(OrderGoods), new(OrderInfo), new(IndexPromotionBanner), new(IndexTypeGoodsBanner), new(IndexGoodsBanner), new(GoodsImage), new(GoodsSKU), new(GoodsType), new(Goods))
+	orm.RegisterModel(new(User), new(Address), new(OrderGoods), new(IndexPromotionBanner), new(IndexTypeGoodsBanner), new(IndexGoodsBanner), new(GoodsImage), new(GoodsSKU), new(GoodsType), new(Goods), new(OrderInfo))
 
 	// create table
 	_ = orm.RunSyncdb("default", false, true)

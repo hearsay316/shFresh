@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "fresh/models"
 	_ "fresh/routers"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/plugins/cors"
