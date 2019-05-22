@@ -9,7 +9,7 @@ import (
 type User struct { //用户表
 	Id        int
 	Name      string       `orm:"size(20);unique"` //用户名
-	PassWord  string       `orm:"size(20)"`        //登陆密码
+	PassWord  string       `orm:"size(200)"`       //登陆密码
 	Email     string       `orm:"size(50)"`        //邮箱
 	Active    bool         `orm:"default(false)"`  //是否激活
 	Power     int          `orm:"default(0)"`      //权限设置  0 表示未激活  1表示激活

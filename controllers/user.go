@@ -77,7 +77,11 @@ func (C *UserController) HandleReg() {
 	var user models.User
 	user.Name = ob.UserName
 	user.Email = ob.Email
-	HashPass, err := bcrypt.GenerateFromPassword([]byte(ob.PassWord), bcrypt.DefaultCost)
+	HashPass, err := bcrypt.GenerateFromPassword([]byte(ob.PassWord), 4)
+	if err != nil {
+		C.Data["json"] = err.Error()
+		return
+	}
 	user.PassWord = string(HashPass)
 	_, err = o.Insert(&user)
 	if err != nil {
@@ -110,16 +114,40 @@ func (C *UserController) HandleReg() {
 
 // Post:登录
 func (C *UserController) HandleLogin() {
+	// 获取数据
 	var ob user
 	var err error
+	defer C.ServeJSON()
 	if err = json.Unmarshal(C.Ctx.Input.RequestBody, &ob); err == nil {
 		C.Data["json"] = ob
 	} else {
 		C.Data["json"] = err.Error()
 	}
+	logs.Info(ob)
+	// orm
+	o := orm.NewOrm()
+	var user models.User
+	user.Name = ob.UserName
+	err = o.Read(&user, "Name")
+	if err != nil {
+		C.Data["json"] = "用户不存在"
+		return
+	}
+	logs.Info(user.PassWord)
+	if user.Active != true {
+		C.Data["json"] = "没有激活"
+		return
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.PassWord), []byte(ob.PassWord))
+	if err != nil {
+		C.Data["json"] = "密码错误"
+		logs.Info(err.Error())
+		return
+	}
+
 	C.Ctx.SetCookie("userName", "", -1)
 	C.SetSession("UserName", ob.UserName)
-	C.ServeJSON()
+
 	/*var user  = models.OrderInfo{Id:123,OrderId:"xsxs"}
 	C.Data["json"] = user
 	C.ServeJSON()*/
