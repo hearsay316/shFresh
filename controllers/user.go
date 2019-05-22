@@ -5,6 +5,8 @@ import (
 	"fresh/models"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/orm"
+	"regexp"
 )
 
 type UserController struct {
@@ -44,22 +46,49 @@ func (C *UserController) HandleReg() {
 			C.Data["error"] = "数据输错"
 			C.TplName = "register.html"
 		}*/
-
+	defer C.ServeJSON()
 	var ob userReg
 	var err error
 	if err = json.Unmarshal(C.Ctx.Input.RequestBody, &ob); err == nil {
-		logs.Info(ob)
-		C.Data["json"] = ob
+		if ob.PassWord == "" || ob.UserName == "" || ob.CPassWord == "" || ob.Email == "" {
+			C.Data["json"] = "数据不完整,请重新填写"
+			return
+		}
+		if ob.PassWord != ob.CPassWord {
+			C.Data["json"] = "两次输入密码有问题,请重新填写"
+			return
+		}
+		reg, _ := regexp.Compile("^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$")
+		res := reg.FindString(ob.Email)
+		if res == "" {
+			C.Data["json"] = "邮箱格式不正确"
+			return
+		}
+
 	} else {
 		C.Data["json"] = err.Error()
+		return
 	}
-	C.ServeJSON()
+
+	o := orm.NewOrm()
+	var user models.User
+	user.Name = ob.UserName
+	user.Email = ob.Email
+	user.PassWord = ob.PassWord
+	user.Active = true
+	_, err = o.Insert(&user)
+	if err != nil {
+		logs.Info("err", err)
+		C.Data["json"] = "数据库写入错误"
+		return
+	}
 
 	// 2 校验数据
 
 	// 3 梳理数据
 
 	//  返回视图
+
 }
 
 // Post:登录
