@@ -6,7 +6,10 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
+	"github.com/astaxie/beego/utils"
+	"golang.org/x/crypto/bcrypt"
 	"regexp"
+	"strconv"
 )
 
 type UserController struct {
@@ -74,14 +77,28 @@ func (C *UserController) HandleReg() {
 	var user models.User
 	user.Name = ob.UserName
 	user.Email = ob.Email
-	user.PassWord = ob.PassWord
-	user.Active = true
+	HashPass, err := bcrypt.GenerateFromPassword([]byte(ob.PassWord), bcrypt.DefaultCost)
+	user.PassWord = string(HashPass)
 	_, err = o.Insert(&user)
 	if err != nil {
 		logs.Info("err", err)
 		C.Data["json"] = "数据库写入错误"
 		return
 	}
+	config := `{"username":"908388349@qq.com","password":"alopfzkexgrgbbeg","host":"smtp.qq.com","port":587}`
+	email := utils.NewEMail(config)
+	email.To = []string{ob.Email}
+	email.Subject = "激活邮件"
+	// 注意发送给用户的是清货请求地址
+	email.Text = "http://localhost:8080/active?id=" + strconv.Itoa(user.Id)
+	logs.Info(`这个是{{strconv.Itoa(user.Id)}}`)
+	err = email.Send()
+	if err != nil {
+		logs.Info("错误", err)
+		C.Data["json"] = "数据库写入错误"
+		return
+	}
+	C.Data["json"] = "邮件发送成功"
 
 	// 2 校验数据
 
@@ -117,4 +134,32 @@ func (C *UserController) HandleUser() {
 	var user = models.OrderInfo{Id: 123, OrderId: "xsxs"}
 	C.Data["json"] = user
 	C.ServeJSON()
+}
+
+// 用户激活
+func (C *UserController) ShowActive() {
+	// 获取数据
+	id, err := C.GetInt("id")
+	if err != nil {
+		C.Redirect("http://localhost:8081/#/register?error=要激活的用户不存在", 302)
+		return
+	}
+	// 更新数据
+	o := orm.NewOrm()
+	var user models.User
+	user.Id = id
+	err = o.Read(&user)
+	if err != nil {
+		C.Redirect("http://localhost:8081/#/register?error=要激活的用户不存在", 302)
+		return
+	}
+	user.Active = true
+	_, err = o.Update(&user)
+	if err != nil {
+		C.Redirect("http://localhost:8081/#/register?error=写出数据库错误", 302)
+		return
+	}
+
+	C.Redirect("http://localhost:8081/#/?success=注册成功,登陆吧", 302)
+
 }
